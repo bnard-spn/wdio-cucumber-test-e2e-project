@@ -18,10 +18,24 @@ When(/^Search with (.*)$/, async function (searchItem) {
 Then(/^Click on the first search result$/, async function () {
     let ele = await $(`<h3>`);
     ele.click();
-})
+});
 
 Then(/^URL should match (.*)$/, async function (expectedURL) {
     console.log(`>>expectedURL: ${expectedURL}`);
     let url = await browser.getUrl()
     chai.expect(url).to.equal(expectedURL);
-})
+});
+
+
+//Web Interactions
+Given(/^A web page is opened$/, async function () {
+    await browser.url("/inputs");
+    await browser.setTimeout({ implicit: 15000, pageLoad: 10000 });
+    await browser.maximizeWindow();
+});
+
+When(/^performing web interactions$/, async function () {
+    let ele = await $(`[type=number]`);
+    await ele.setValue("12345");
+    await browser.pause(3000);
+});
