@@ -1,3 +1,10 @@
+// @ts-nocheck
+import dotenv from "dotenv"
+import allure from "@wdio/allure-reporter"
+import fs from "fs"
+dotenv.config()
+let headless = process.env.HEADLESS
+let debug = process.env.DEBUG
 import type { Options } from '@wdio/types'
 export const config: Options.Testrunner = {
     //
@@ -60,7 +67,11 @@ export const config: Options.Testrunner = {
     // https://saucelabs.com/platform/platform-configurator
     //
     capabilities: [{
+        maxInstances: 5,
         browserName: 'chrome',
+        "goog:chromeOptions": {
+            args: headless === "Y" ? ["--disable-web-security", "--headless", "--disable-dev-shm-usage", "--no-sandbox", "--window-size=1920,1080"] : []
+        },
         acceptInsecureCerts: true,
         timeouts: { implicit: 5000, pageLoad: 20000, script: 30000 }
     }],
@@ -72,7 +83,7 @@ export const config: Options.Testrunner = {
     // Define all options that are relevant for the WebdriverIO instance here
     //
     // Level of logging verbosity: trace | debug | info | warn | error | silent
-    logLevel: 'error',
+    logLevel: debug.toUpperCase() === "Y" ? 'info' : 'error',
     //
     // Set specific log levels per logger
     // loggers:
@@ -135,7 +146,15 @@ export const config: Options.Testrunner = {
     // Test reporter for stdout.
     // The only one supported by default is 'dot'
     // see also: https://webdriver.io/docs/dot-reporter
-    reporters: ['spec', ['allure', { outputDir: 'allure-results' }]],
+    reporters: [
+        'spec',
+        ['allure',
+            {
+                outputDir: 'allure-results',
+                disableWebdriverStepsReporting: true,
+                useCucumberStepReporter: true
+            }]
+    ],
 
     // If you are using Cucumber you need to specify the location of your step definitions.
     cucumberOpts: {
@@ -176,8 +195,11 @@ export const config: Options.Testrunner = {
      * @param {object} config wdio configuration object
      * @param {Array.<Object>} capabilities list of capabilities details
      */
-    // onPrepare: function (config, capabilities) {
-    // },
+    onPrepare: function (config, capabilities) {
+        if (process.env.RUNNER === "LOCAL" && fs.existsSync("./allure-results")) {
+            fs.rmdirSync("./allure-results", { recursive: true })
+        }
+    },
     /**
      * Gets executed before a worker process is spawned and can be used to initialize specific service
      * for that worker as well as modify runtime environments in an async fashion.
@@ -215,8 +237,12 @@ export const config: Options.Testrunner = {
      * @param {Array.<String>} specs        List of spec file paths that are to be run
      * @param {object}         browser      instance of created browser/device session
      */
-    // before: function (capabilities, specs) {
-    // },
+    before: function (capabilities, specs) {
+        browser.options["environment"] = config.environment
+        browser.options["sauseDemoURL"] = config.sauseDemoURL
+        browser.options["reqresBaseURL"] = config.reqresBaseURL
+        browser.options["nopeCommerceBaseURL"] = config.nopeCommerceBaseURL
+    },
     /**
      * Runs before a WebdriverIO command gets executed.
      * @param {string} commandName hook command name
@@ -239,8 +265,15 @@ export const config: Options.Testrunner = {
      * @param {ITestCaseHookParameter} world    world object containing information on pickle and test step
      * @param {object}                 context  Cucumber World object
      */
-    // beforeScenario: function (world, context) {
-    // },
+    beforeScenario: function (world, context) {
+        //console.log(`>> World Object: ${JSON.stringify(world)}`);
+        let arr = world.pickle.name.split(/:/)
+        // @ts-ignore
+        if (arr.length > 0) context.testId = arr[0]
+
+        // @ts-ignore
+        if (!context.testId) throw Error(`Error getting testId for current scenario: ${world.pickle.name}`)
+    },
     /**
      *
      * Runs before a Cucumber Step.
@@ -248,8 +281,9 @@ export const config: Options.Testrunner = {
      * @param {IPickle}            scenario scenario pickle
      * @param {object}             context  Cucumber World object
      */
-    // beforeStep: function (step, scenario, context) {
-    // },
+    beforeStep: function (step, scenario, context) {
+        this.testId = context.testId
+    },
     /**
      *
      * Runs after a Cucumber Step.
@@ -261,8 +295,16 @@ export const config: Options.Testrunner = {
      * @param {number}             result.duration  duration of scenario in milliseconds
      * @param {object}             context          Cucumber World object
      */
-    // afterStep: function (step, scenario, result, context) {
-    // },
+    afterStep: async function (step, scenario, result, context) {
+        // console.log(`>> step: ${JSON.stringify(step)}`)
+        // console.log(`>> scenario: ${JSON.stringify(scenario)}`)
+        // console.log(`>> result: ${JSON.stringify(result)}`)
+
+        //Take screenshot
+        if (!result.passed) {
+            await browser.takeScreenshot()
+        }
+    },
     /**
      *
      * Runs after a Cucumber Scenario.
