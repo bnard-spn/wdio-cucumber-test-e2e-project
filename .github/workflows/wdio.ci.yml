@@ -25,5 +25,7 @@ jobs:
           node-version: 20.x
       - name: Install dependencies
         run: npm install
+      - name: test
+        run: echo process.env.RUNNER env.RUNNER
       - name: Running smoke tests
         run: npm run test:smoke
