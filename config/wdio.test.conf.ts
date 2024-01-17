@@ -4,7 +4,7 @@ export const config = Object.assign(baseConfig, {
     environment: "TEST",
     sauseDemoURL: "https://www.saucedemo.com",
     reqresBaseURL: "https://reqres.in",
-    nopeCommerceBaseURL: "https://admin-demo.nopcommerce.com",
+    nopCommerceBaseURL: "https://admin-demo.nopcommerce.com",
     sqlConfig: {
         user: process.env.DB_USER,
         password: process.env.DB_PASS,

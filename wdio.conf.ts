@@ -67,15 +67,23 @@ export const config: Options.Testrunner = {
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
     // https://saucelabs.com/platform/platform-configurator
     //
-    capabilities: [{
-        maxInstances: 5,
-        browserName: 'chrome',
-        "goog:chromeOptions": {
-            args: headless === "Y" ? ["--disable-web-security", "--headless", "--disable-dev-shm-usage", "--no-sandbox", "--window-size=1920,1080"] : []
-        },
-        acceptInsecureCerts: true,
-        timeouts: { implicit: 5000, pageLoad: 20000, script: 30000 }
-    }],
+    capabilities: [
+        {
+            maxInstances: 5,
+            browserName: 'chrome',
+            "goog:chromeOptions": {
+                args: headless === "Y" ? ["--disable-web-security", "--headless", "--disable-dev-shm-usage", "--no-sandbox", "--window-size=1920,1080"] : []
+            },
+            acceptInsecureCerts: true,
+            timeouts: { implicit: 5000, pageLoad: 20000, script: 30000 }
+        }
+        // {
+        //     maxInstances: 5,
+        //     browserName: 'firefox',
+        //     acceptInsecureCerts: true,
+        //     timeouts: { implicit: 5000, pageLoad: 20000, script: 30000 }
+        // }
+    ],
 
     //
     // ===================
@@ -124,7 +132,7 @@ export const config: Options.Testrunner = {
     // Services take over a specific job you don't want to take care of. They enhance
     // your test setup with almost no effort. Unlike plugins, they don't add new
     // commands. Instead, they hook themselves up into the test process.
-    // services: [],
+    //services: ['chromedriver', 'geckodriver'],
     //
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber
@@ -242,7 +250,7 @@ export const config: Options.Testrunner = {
         browser.options["environment"] = config.environment
         browser.options["sauseDemoURL"] = config.sauseDemoURL
         browser.options["reqresBaseURL"] = config.reqresBaseURL
-        browser.options["nopeCommerceBaseURL"] = config.nopeCommerceBaseURL
+        browser.options["nopCommerceBaseURL"] = config.nopCommerceBaseURL
     },
     /**
      * Runs before a WebdriverIO command gets executed.
