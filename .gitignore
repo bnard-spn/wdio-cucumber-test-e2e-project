@@ -1,7 +1,6 @@
 # Project specific
 allure-results
 debug
-data/apiResponse
 # Logs
 logs
 *.log
