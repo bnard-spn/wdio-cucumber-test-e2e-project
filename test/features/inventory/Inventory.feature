@@ -2,7 +2,6 @@ Feature: Inventory
 
     Feature Description
 
-    @demo
     Scenario Outline: <TestID>: Demo Inventory
         Given As a standard user I login to inventory app
             | UserType | Username                |

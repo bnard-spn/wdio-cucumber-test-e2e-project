@@ -2,6 +2,8 @@ import { Then } from "@wdio/cucumber-framework";
 import chai from "chai";
 import logger from "../../helper/logger.js";
 import reporter from "../../helper/reporter.js";
+import fs from "fs"
+import nopcommerceCustomersPage from "../../page-objects/nopcommerce.customers.page.js";
 
 Then(/^Inventory page should list (.*)$/, async function (numberOfProducts) {
     try {
@@ -39,4 +41,44 @@ Then(/^Validate all products have valid price$/, async function () {
     //Asert if any value is < 0
     let invalidPriceList = priceNumArr.filter(ele => ele <= 0)
     chai.expect(invalidPriceList.length).to.equal(0)
+})
+
+Then(/^user can verify if all users exist in customers list$/, async function () {
+
+    try {
+        // Navigate/select Customer options from left menu
+        // @ts-ignore
+        await browser.url(`${browser.options.nopCommerceBaseURL}/Admin/Customer/List`)
+        reporter.addStep(this.testId, "info", `Navigated to customer list screen`)
+
+        // Read API response from /data folder
+        let filename = `${process.cwd()}/data/apiResponse/reqresAPIUsers.json`
+        let data = fs.readFileSync(filename, "utf8")
+        let dataObject = JSON.parse(data)
+
+        // For each user object in API response
+        let numberOfObject = dataObject.data.length
+        let arr = []
+        for (let i = 0; i < numberOfObject; i++) {
+            let obj = {}
+            let firstName = dataObject.data[i].first_name
+            let lastName = dataObject.data[i].last_name
+            let customerNotFound = await nopcommerceCustomersPage.searchNameAndConfirm(this.testId, firstName, lastName)
+            if (customerNotFound) {
+                obj['firstName'] = firstName
+                obj['lastName'] = lastName
+                arr.push(obj)
+            }
+        }
+
+        // In case user does not exist write it to error file
+        if (arr.length > 1) {
+            let data = JSON.stringify(arr, undefined, 4)
+            let filePath = `${process.cwd()}/results/custNotFoundList.json`
+            fs.writeFileSync(filePath, data)
+        }
+    } catch (err) {
+        err.message = `[${this.testId}]: Failed at checking users in nopcommerce site, ${err.message}`
+        throw err
+    }
 })

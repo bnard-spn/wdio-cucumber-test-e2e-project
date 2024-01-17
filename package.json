@@ -21,6 +21,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/chai": "^4.3.11",
+    "@types/supertest": "^6.0.2",
     "@wdio/allure-reporter": "^8.26.3",
     "@wdio/cli": "^8.26.3",
     "@wdio/cucumber-framework": "^8.26.3",
@@ -28,8 +29,12 @@
     "@wdio/spec-reporter": "^8.26.3",
     "chai": "^4.3.10",
     "dotenv": "^16.3.1",
+    "geckodriver": "^4.3.0",
+    "supertest": "^6.3.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
+    "wdio-chromedriver-service": "^8.1.1",
+    "wdio-geckodriver-service": "^5.0.2",
     "winston": "^3.11.0"
   }
 }
