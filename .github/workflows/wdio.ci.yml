@@ -26,6 +26,6 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: test
-        run: echo ${process.env.RUNNER} ${env.RUNNER} ${{secrets.RUNNER}}
+        run: echo ${{ secrets.RUNNER }}
       - name: Running smoke tests
         run: npm run test:smoke
